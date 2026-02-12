@@ -19,6 +19,23 @@
       <div class="topbar-note">Static mode: no login, no database, no save.</div>
     </header>
 
+    <section class="demo-toolbar">
+      <div class="demo-toolbar-left">
+        <span class="demo-pill">Demo Draft</span>
+        <span class="demo-muted">Visual-only actions for portfolio preview.</span>
+      </div>
+      <div class="demo-toolbar-actions">
+        <button type="button" id="demo-save" class="primary">Save</button>
+        <button type="button" id="demo-save-new" class="ghost">Save As New</button>
+        <button type="button" id="demo-export" class="ghost">Export PDF</button>
+        <button type="button" id="demo-db-tools" class="ghost">Database Tools</button>
+        <button type="button" id="demo-report" class="ghost">Report Adjust</button>
+        <button type="button" id="demo-open-trash" class="ghost">Trash</button>
+        <button type="button" id="demo-new-form" class="ghost">New Form</button>
+        <button type="button" id="demo-logout" class="ghost">Logout</button>
+      </div>
+    </section>
+
     <main class="layout">
       <section class="panel form-panel">
         <div class="panel-head">
@@ -106,6 +123,68 @@
             </div>
           </div>
         </form>
+
+        <div class="extra-panels">
+          <section class="mini-panel">
+            <div class="mini-head">
+              <h3>Saved Forms</h3>
+              <button type="button" id="demo-refresh-saved" class="ghost">Refresh</button>
+            </div>
+            <div class="table-wrap">
+              <table class="mini-table">
+                <thead>
+                  <tr>
+                    <th>Form No</th>
+                    <th>To</th>
+                    <th>Date</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="saved-body">
+                  <tr>
+                    <td>PO-2026-001</td>
+                    <td>Client Alpha</td>
+                    <td>2026-02-12</td>
+                    <td><button type="button" class="ghost mini-action" data-demo-action="load">Load</button></td>
+                  </tr>
+                  <tr>
+                    <td>PO-2026-002</td>
+                    <td>Client Beta</td>
+                    <td>2026-02-13</td>
+                    <td><button type="button" class="ghost mini-action" data-demo-action="load">Load</button></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="mini-panel" id="trash-panel">
+            <div class="mini-head">
+              <h3>Trash</h3>
+              <button type="button" id="demo-clear-trash" class="ghost">Empty Trash</button>
+            </div>
+            <div class="table-wrap">
+              <table class="mini-table">
+                <thead>
+                  <tr>
+                    <th>Form No</th>
+                    <th>Deleted At</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="trash-body">
+                  <tr>
+                    <td>PO-2026-OLD</td>
+                    <td>2026-02-11</td>
+                    <td>
+                      <button type="button" class="ghost mini-action" data-demo-action="restore">Restore</button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+        </div>
       </section>
 
       <section class="panel preview-panel">
@@ -152,6 +231,8 @@
         </article>
       </section>
     </main>
+
+    <div id="demo-toast" class="demo-toast" role="status" aria-live="polite" hidden></div>
 
     <script src="./app.js"></script>
   </body>

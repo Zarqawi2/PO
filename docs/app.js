@@ -4,6 +4,19 @@ const previewItems = document.getElementById("preview-items");
 const addRowButton = document.getElementById("add-row");
 const fillSampleButton = document.getElementById("fill-sample");
 const resetButton = document.getElementById("reset-form");
+const demoToast = document.getElementById("demo-toast");
+const trashPanel = document.getElementById("trash-panel");
+const demoButtons = [
+  { id: "demo-save", text: "Save is disabled in static demo." },
+  { id: "demo-save-new", text: "Save As New is disabled in static demo." },
+  { id: "demo-export", text: "Export PDF requires backend endpoint." },
+  { id: "demo-db-tools", text: "Database Tools are backend-only." },
+  { id: "demo-report", text: "Report Adjust panel is hidden in demo build." },
+  { id: "demo-logout", text: "Logout is disabled in static demo." },
+  { id: "demo-refresh-saved", text: "Saved forms list is static sample data." },
+  { id: "demo-clear-trash", text: "Trash cleanup needs backend database." },
+];
+let toastTimer = null;
 
 const fields = [
   "to",
@@ -65,6 +78,22 @@ const formatDate = (raw) => {
 const valueOrDash = (value) => {
   const txt = String(value ?? "").trim();
   return txt || "-";
+};
+
+const showToast = (message) => {
+  if (!demoToast) return;
+  demoToast.textContent = message;
+  demoToast.hidden = false;
+  demoToast.classList.add("show");
+  if (toastTimer) {
+    window.clearTimeout(toastTimer);
+  }
+  toastTimer = window.setTimeout(() => {
+    demoToast.classList.remove("show");
+    window.setTimeout(() => {
+      demoToast.hidden = true;
+    }, 180);
+  }, 2300);
 };
 
 const updatePreview = () => {
@@ -188,6 +217,45 @@ fields.forEach((id) => {
 addRowButton.addEventListener("click", () => addRow());
 fillSampleButton.addEventListener("click", fillSample);
 resetButton.addEventListener("click", resetDemo);
+
+demoButtons.forEach((buttonConfig) => {
+  const element = document.getElementById(buttonConfig.id);
+  if (!element) return;
+  element.addEventListener("click", () => showToast(buttonConfig.text));
+});
+
+const demoOpenTrashButton = document.getElementById("demo-open-trash");
+if (demoOpenTrashButton) {
+  demoOpenTrashButton.addEventListener("click", () => {
+    if (trashPanel) {
+      trashPanel.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+    showToast("Trash section opened (demo mode).");
+  });
+}
+
+const demoNewFormButton = document.getElementById("demo-new-form");
+if (demoNewFormButton) {
+  demoNewFormButton.addEventListener("click", () => {
+    resetDemo();
+    showToast("New form created in demo mode.");
+  });
+}
+
+document.addEventListener("click", (event) => {
+  const target = event.target;
+  if (!(target instanceof HTMLElement)) return;
+  const action = target.getAttribute("data-demo-action");
+  if (!action) return;
+  if (action === "load") {
+    fillSample();
+    showToast("Loaded sample record (static demo).");
+    return;
+  }
+  if (action === "restore") {
+    showToast("Restore action needs backend database.");
+  }
+});
 
 // Initialize a sensible default date and first preview.
 const dateInput = document.getElementById("date");
