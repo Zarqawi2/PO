@@ -1,0 +1,11 @@
+﻿Flask==3.0.3
+pypdf==6.6.2
+reportlab==4.2.2
+Pillow>=9.0
+pdfplumber==0.11.8
+psycopg[binary]
+python-dotenv==1.0.1
+webauthn==2.7.0
+gunicorn==23.0.0
+waitress==3.0.0
+pytest==8.3.5

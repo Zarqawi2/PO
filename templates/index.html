@@ -1,0 +1,1060 @@
+﻿<!doctype html>
+<html lang="en"{% if not initial_authenticated %} class="auth-pending auth-locked"{% endif %}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>PO Management</title>
+    <link rel="icon" type="image/png" href="/static/img/logo.png" />
+    <link rel="shortcut icon" type="image/png" href="/static/img/logo.png" />
+    <link rel="apple-touch-icon" href="/static/img/logo.png" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css', v=css_version) }}" />
+  </head>
+  <body{% if not initial_authenticated %} class="auth-pending auth-locked"{% endif %}>
+    <script>
+      (function () {
+        var theme = "light";
+        try {
+          var stored = localStorage.getItem("theme");
+          if (stored === "dark" || stored === "light") {
+            theme = stored;
+          } else if (
+            window.matchMedia &&
+            window.matchMedia("(prefers-color-scheme: dark)").matches
+          ) {
+            theme = "dark";
+          }
+        } catch (error) {
+          theme = "light";
+        }
+
+        var isDark = theme === "dark";
+        document.documentElement.classList.toggle("theme-dark", isDark);
+        if (document.body) {
+          document.body.classList.toggle("theme-dark", isDark);
+        }
+      })();
+    </script>
+    <header class="app-header">
+      <div class="header-brand"></div>
+      <div class="header-mobile-controls">
+        <button
+          type="button"
+          id="mobile-theme-toggle"
+          class="ghost theme-toggle mobile-theme-toggle"
+          aria-label="Toggle theme"
+          title="Toggle theme"
+        >
+          <img class="theme-toggle__icon" src="/static/img/sun.png" alt="" aria-hidden="true" />
+          <span class="sr-only">Toggle theme</span>
+        </button>
+        <button
+          type="button"
+          id="mobile-login-requests"
+          class="ghost mobile-login-requests"
+          aria-label="No pending sign-in requests"
+          title="Sign-In Requests"
+          disabled
+          hidden
+        >
+          <span class="mobile-login-requests__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" role="img" focusable="false">
+              <path d="M15 17H5l2-2v-4a5 5 0 0 1 10 0v4l2 2h-4"></path>
+              <path d="M10 19a2 2 0 0 0 4 0"></path>
+            </svg>
+          </span>
+          <span id="mobile-login-requests-dot" class="mobile-login-requests__dot" aria-hidden="true" hidden></span>
+          <span class="sr-only">Open sign-in requests</span>
+        </button>
+        <button
+          type="button"
+          id="mobile-menu-toggle"
+          class="ghost nav-toggle"
+          aria-expanded="false"
+          aria-controls="header-actions"
+          aria-label="Toggle menu"
+          title="Toggle menu"
+        >
+          <img class="nav-toggle__icon" src="/static/img/menu.png" alt="" aria-hidden="true" />
+          <span class="sr-only">Toggle menu</span>
+        </button>
+      </div>
+      <div class="header-status">
+        <div class="save-status warn" id="save-status">New draft</div>
+      </div>
+        <div id="header-actions" class="header-actions">
+          <button type="button" id="theme-toggle" class="ghost theme-toggle" aria-label="Toggle theme" title="Toggle theme">
+            <img class="theme-toggle__icon" src="/static/img/sun.png" alt="" aria-hidden="true" />
+            <span class="sr-only">Toggle theme</span>
+          </button>
+          <button type="button" id="save" class="primary has-icon">
+            <span class="btn-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" role="img" focusable="false">
+                <path d="M5 4h12l2 2v14H5z"></path>
+                <path d="M8 4v6h8V4"></path>
+                <path d="M8 20v-6h8v6"></path>
+              </svg>
+            </span>
+            <span class="btn-label">Save</span>
+          </button>
+          <button type="button" id="save-as-new" class="ghost has-icon">
+            <span class="btn-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" role="img" focusable="false">
+                <rect x="4" y="6" width="12" height="12" rx="2"></rect>
+                <rect x="8" y="2" width="12" height="12" rx="2"></rect>
+              </svg>
+            </span>
+            <span class="btn-label">Save As New</span>
+          </button>
+          <button type="button" id="export" class="ghost has-icon">
+            <span class="btn-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" role="img" focusable="false">
+                <path d="M12 3v10"></path>
+                <path d="M8 9l4 4 4-4"></path>
+                <path d="M4 16v3h16v-3"></path>
+              </svg>
+            </span>
+            <span class="btn-label">Export PDF</span>
+          </button>
+          <button type="button" id="db-tools" class="ghost has-icon">
+            <span class="btn-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" role="img" focusable="false">
+                <ellipse cx="12" cy="5" rx="7" ry="3.2"></ellipse>
+                <path d="M5 5v6c0 1.8 3.1 3.2 7 3.2s7-1.4 7-3.2V5"></path>
+                <path d="M5 11v6c0 1.8 3.1 3.2 7 3.2s7-1.4 7-3.2v-6"></path>
+              </svg>
+            </span>
+            <span class="btn-label">Database Tools</span>
+          </button>
+          <button type="button" id="reset" class="ghost has-icon">
+            <span class="btn-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" role="img" focusable="false">
+                <path d="M4 12a8 8 0 1 0 3-6.2"></path>
+                <path d="M4 4v5h5"></path>
+              </svg>
+            </span>
+            <span class="btn-label">New Form</span>
+          </button>
+          <button type="button" id="logout" class="ghost has-icon">
+            <span class="btn-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" role="img" focusable="false">
+                <path d="M10 4H6.8A1.8 1.8 0 0 0 5 5.8v12.4A1.8 1.8 0 0 0 6.8 20H10"></path>
+                <path d="M14 16l4-4-4-4"></path>
+                <path d="M18 12H9"></path>
+              </svg>
+            </span>
+            <span class="btn-label">Logout</span>
+          </button>
+          <div id="header-settings" class="header-settings">
+            <button
+              type="button"
+              id="settings-toggle"
+              class="ghost settings-toggle"
+              aria-haspopup="menu"
+              aria-expanded="false"
+              aria-controls="settings-menu"
+              title="Settings"
+            >
+              <span class="settings-toggle__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" role="img" focusable="false">
+                  <path
+                    d="M19.14 12.94c.04-.31.06-.63.06-.94s-.02-.63-.06-.94l2.03-1.58a.5.5 0 0 0 .12-.64l-1.92-3.32a.5.5 0 0 0-.6-.22l-2.39.96a7.03 7.03 0 0 0-1.63-.94l-.36-2.54a.5.5 0 0 0-.5-.42h-3.84a.5.5 0 0 0-.5.42l-.36 2.54c-.57.22-1.12.53-1.63.94l-2.39-.96a.5.5 0 0 0-.6.22L2.71 8.84a.5.5 0 0 0 .12.64L4.86 11c-.04.31-.06.63-.06.94s.02.63.06.94l-2.03 1.58a.5.5 0 0 0-.12.64l1.92 3.32a.5.5 0 0 0 .6.22l2.39-.96c.5.4 1.05.72 1.63.94l.36 2.54a.5.5 0 0 0 .5.42h3.84a.5.5 0 0 0 .5-.42l.36-2.54c.57-.22 1.12-.53 1.63-.94l2.39.96a.5.5 0 0 0 .6-.22l1.92-3.32a.5.5 0 0 0-.12-.64l-2.03-1.58z"
+                  />
+                  <circle cx="12" cy="12" r="3.2" />
+                </svg>
+              </span>
+              <span id="settings-login-requests-dot" class="settings-toggle__badge-dot" aria-hidden="true" hidden></span>
+              <span class="sr-only">Open settings</span>
+            </button>
+            <div id="settings-menu" class="settings-menu" role="menu" aria-hidden="true">
+              <button
+                type="button"
+                id="settings-theme-toggle"
+                class="ghost settings-menu-item theme-toggle"
+                role="menuitem"
+                aria-label="Toggle theme"
+                title="Toggle theme"
+              >
+                <img class="theme-toggle__icon" src="/static/img/sun.png" alt="" aria-hidden="true" />
+                <span class="theme-toggle__text">Dark</span>
+              </button>
+              <button
+                type="button"
+                id="settings-login-requests"
+                class="ghost settings-menu-item settings-menu-item--requests"
+                role="menuitem"
+                aria-label="No pending sign-in requests"
+                title="Sign-In Requests"
+                disabled
+                hidden
+              >
+                <span class="settings-menu-item__icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" role="img" focusable="false">
+                    <path d="M15 17H5l2-2v-4a5 5 0 0 1 10 0v4l2 2h-4"></path>
+                    <path d="M10 19a2 2 0 0 0 4 0"></path>
+                  </svg>
+                </span>
+                <span class="settings-menu-item__label">Sign-In Requests</span>
+                <span id="settings-login-requests-badge" class="settings-menu-item__badge" hidden>0</span>
+              </button>
+              <button type="button" id="settings-db-tools" class="ghost settings-menu-item" role="menuitem">
+                <span class="settings-menu-item__icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" role="img" focusable="false">
+                    <ellipse cx="12" cy="5" rx="7" ry="3.2"></ellipse>
+                    <path d="M5 5v6c0 1.8 3.1 3.2 7 3.2s7-1.4 7-3.2V5"></path>
+                    <path d="M5 11v6c0 1.8 3.1 3.2 7 3.2s7-1.4 7-3.2v-6"></path>
+                  </svg>
+                </span>
+                Database Tools
+              </button>
+              <button type="button" id="settings-logout" class="ghost settings-menu-item settings-menu-item--danger" role="menuitem">
+                <span class="settings-menu-item__icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" role="img" focusable="false">
+                    <path d="M10 4H6.8A1.8 1.8 0 0 0 5 5.8v12.4A1.8 1.8 0 0 0 6.8 20H10"></path>
+                    <path d="M14 16l4-4-4-4"></path>
+                    <path d="M18 12H9"></path>
+                  </svg>
+                </span>
+                Logout
+              </button>
+            </div>
+          </div>
+        </div>
+    </header>
+
+    <main>
+      <div id="auth-modal" class="auth-modal" aria-hidden="true">
+        <div class="auth-modal-card" role="dialog" aria-modal="true" aria-label="Passkey Authentication">
+          <div class="auth-modal-head">
+            <div class="auth-modal-brand-main">
+              <img src="/static/img/logo.png" alt="PO Management logo" />
+              <div class="auth-modal-brand-copy">
+                <span>PO MANAGEMENT</span>
+                <strong>Secure Access</strong>
+              </div>
+            </div>
+            <button
+              type="button"
+              id="auth-theme-toggle"
+              class="ghost theme-toggle auth-theme-toggle"
+              aria-label="Toggle theme"
+              title="Toggle theme"
+            >
+              <img class="theme-toggle__icon" src="/static/img/sun.png" alt="" aria-hidden="true" />
+              <span class="sr-only">Toggle theme</span>
+            </button>
+          </div>
+          <div class="auth-modal-copy">
+            <h3 id="auth-title">
+              {{ "Access Code Login" if auth_code_only else ("Sign In Required" if initial_has_passkey else "Create First Passkey") }}
+            </h3>
+            <p id="auth-subtitle">
+              {{ "Enter your access code to unlock PO Management." if auth_code_only else ("Use your device passkey to unlock PO Management." if initial_has_passkey else "No passkey found. Create one for this app now.") }}
+            </p>
+          </div>
+          <div id="auth-mode-switch" class="auth-mode-switch" role="group" aria-label="Choose login method"{% if auth_code_only %} style="display: none;"{% endif %}>
+            <button type="button" id="auth-mode-passkey" class="ghost auth-mode-button is-active" aria-pressed="true">
+              Passkey
+            </button>
+            <button type="button" id="auth-mode-code" class="ghost auth-mode-button" aria-pressed="false">
+              Access Code
+            </button>
+          </div>
+          <div class="auth-methods" id="auth-methods"{% if auth_code_only %} style="display: none;"{% endif %}>
+            <div class="auth-methods-title">Sign-in methods</div>
+            <div id="auth-method-list" class="auth-method-list" aria-live="polite">
+              <div class="auth-method is-enabled">
+                <span class="auth-method-dot" aria-hidden="true"></span>
+                <span class="auth-method-name">This device (PIN/Biometrics)</span>
+                <span class="auth-method-state">Available</span>
+              </div>
+              <div class="auth-method is-enabled">
+                <span class="auth-method-dot" aria-hidden="true"></span>
+                <span class="auth-method-name">Phone passkey (iPhone/Android)</span>
+                <span class="auth-method-state">Available</span>
+              </div>
+              <div class="auth-method is-enabled">
+                <span class="auth-method-dot" aria-hidden="true"></span>
+                <span class="auth-method-name">Security key (USB/NFC/Bluetooth)</span>
+                <span class="auth-method-state">Available</span>
+              </div>
+            </div>
+          </div>
+          <label class="auth-field" id="auth-setup-field"{% if initial_has_passkey or auth_code_only %} style="display: none;"{% endif %}>
+            First Admin Setup Code
+            <input id="auth-setup-code" type="password" autocomplete="one-time-code" />
+          </label>
+          <div id="auth-code-panel" class="auth-code-panel"{% if auth_code_only %} style="display: grid;"{% else %} style="display: none;"{% endif %}>
+            <label class="auth-field">
+              Access Code
+              <input
+                id="auth-code-input"
+                type="password"
+                autocomplete="one-time-code"
+                placeholder="Enter access code"
+              />
+            </label>
+          </div>
+          <div class="auth-actions{% if initial_has_passkey or auth_code_only %} single{% endif %}">
+            <button type="button" id="auth-register" class="primary has-icon"{% if initial_has_passkey or auth_code_only %} style="display: none;"{% endif %}>
+              <span class="btn-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" role="img" focusable="false">
+                  <circle cx="8" cy="12" r="3"></circle>
+                  <path d="M11 12h9"></path>
+                  <path d="M18 9v6"></path>
+                </svg>
+              </span>
+              <span class="btn-label">Create Passkey</span>
+            </button>
+            <button type="button" id="auth-login" class="ghost has-icon"{% if not initial_has_passkey or auth_code_only %} style="display: none;"{% endif %}>
+              <span class="btn-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" role="img" focusable="false">
+                  <path d="M10 4H6.8A1.8 1.8 0 0 0 5 5.8v12.4A1.8 1.8 0 0 0 6.8 20H10"></path>
+                  <path d="M14 16l4-4-4-4"></path>
+                  <path d="M18 12H9"></path>
+                </svg>
+              </span>
+              <span class="btn-label">Sign In</span>
+            </button>
+            <button type="button" id="auth-code-login" class="primary has-icon"{% if auth_code_only %} style="display: inline-flex;"{% else %} style="display: none;"{% endif %}>
+              <span class="btn-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" role="img" focusable="false">
+                  <rect x="4" y="10" width="16" height="10" rx="2"></rect>
+                  <path d="M8 10V7a4 4 0 0 1 8 0v3"></path>
+                  <circle cx="12" cy="15" r="1.2"></circle>
+                </svg>
+              </span>
+              <span class="btn-label">Sign In with Code</span>
+            </button>
+          </div>
+          <div id="auth-status" class="auth-status">{{ "Enter access code to continue." if auth_code_only else "Authenticate to continue." }}</div>
+        </div>
+      </div>
+      <div id="login-approval-modal" class="login-approval-modal" aria-hidden="true">
+        <div class="login-approval-card" role="dialog" aria-modal="true" aria-label="Approve sign-in request">
+          <div class="login-approval-head">
+            <h3>Approve Sign-In Request</h3>
+            <button type="button" id="login-approval-close" class="ghost has-icon">
+              <span class="btn-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" role="img" focusable="false">
+                  <path d="M6 6l12 12"></path>
+                  <path d="M18 6l-12 12"></path>
+                </svg>
+              </span>
+              <span class="btn-label">Later</span>
+            </button>
+          </div>
+          <p class="login-approval-copy">A new passkey sign-in request is waiting for your decision.</p>
+          <div class="login-approval-details" aria-live="polite">
+            <div class="login-approval-row">
+              <span class="login-approval-label">User</span>
+              <span id="login-approval-user" class="login-approval-value">-</span>
+            </div>
+            <div class="login-approval-row">
+              <span class="login-approval-label">IP</span>
+              <span id="login-approval-ip" class="login-approval-value">-</span>
+            </div>
+            <div class="login-approval-row">
+              <span class="login-approval-label">Requested</span>
+              <span id="login-approval-created" class="login-approval-value">-</span>
+            </div>
+            <div class="login-approval-row">
+              <span class="login-approval-label">Expires in</span>
+              <span id="login-approval-expires" class="login-approval-value">-</span>
+            </div>
+            <div class="login-approval-row login-approval-row--stack">
+              <span class="login-approval-label">Device</span>
+              <span id="login-approval-device" class="login-approval-value">-</span>
+            </div>
+          </div>
+          <div id="login-approval-status" class="login-approval-status">Review request details and choose an action.</div>
+          <div class="login-approval-actions">
+            <button type="button" id="login-approval-reject" class="ghost has-icon">
+              <span class="btn-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" role="img" focusable="false">
+                  <path d="M6 6l12 12"></path>
+                  <path d="M18 6l-12 12"></path>
+                </svg>
+              </span>
+              <span class="btn-label">Reject</span>
+            </button>
+            <button type="button" id="login-approval-approve" class="primary has-icon">
+              <span class="btn-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" role="img" focusable="false">
+                  <path d="M20 7L10 17l-5-5"></path>
+                </svg>
+              </span>
+              <span class="btn-label">Approve</span>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div id="editor-backdrop" class="editor-backdrop"></div>
+      <div id="pdf-preview-modal" class="pdf-modal" aria-hidden="true">
+        <div class="pdf-modal-card" role="dialog" aria-modal="true" aria-label="PDF Preview">
+          <div class="pdf-modal-header">
+            <h3>PDF Preview</h3>
+            <div class="pdf-modal-actions">
+              <button type="button" id="pdf-download" class="primary has-icon">
+                <span class="btn-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" role="img" focusable="false">
+                    <path d="M12 3v10"></path>
+                    <path d="M8 9l4 4 4-4"></path>
+                    <path d="M4 16v3h16v-3"></path>
+                  </svg>
+                </span>
+                <span class="btn-label">Download</span>
+              </button>
+              <button type="button" id="pdf-close" class="ghost has-icon">
+                <span class="btn-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" role="img" focusable="false">
+                    <path d="M6 6l12 12"></path>
+                    <path d="M18 6l-12 12"></path>
+                  </svg>
+                </span>
+                <span class="btn-label">Close</span>
+              </button>
+            </div>
+          </div>
+          <iframe id="pdf-frame" title="PDF Preview"></iframe>
+        </div>
+      </div>
+      <div id="trash-modal" class="trash-modal" aria-hidden="true">
+        <div class="trash-modal-card trash-panel" role="dialog" aria-modal="true" aria-label="Trash">
+          <div class="trash-modal-header">
+            <h3>Trash</h3>
+            <button type="button" id="trash-close" class="ghost has-icon">
+              <span class="btn-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" role="img" focusable="false">
+                  <path d="M6 6l12 12"></path>
+                  <path d="M18 6l-12 12"></path>
+                </svg>
+              </span>
+              <span class="btn-label">Close</span>
+            </button>
+          </div>
+          <div class="trash-modal-body">
+            <div class="table-wrap">
+              <table class="saved-table">
+                <thead>
+                  <tr>
+                    <th>Trash ID</th>
+                    <th>Form No</th>
+                    <th>To</th>
+                    <th>Date</th>
+                    <th>Company</th>
+                    <th>Items</th>
+                    <th>Deleted</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="trash-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div id="db-tools-modal" class="trash-modal db-tools-modal" aria-hidden="true">
+        <div
+          class="trash-modal-card db-tools-card"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Database Tools"
+        >
+          <div class="trash-modal-header">
+            <h3>Database Tools</h3>
+            <button type="button" id="db-tools-close" class="ghost has-icon">
+              <span class="btn-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" role="img" focusable="false">
+                  <path d="M6 6l12 12"></path>
+                  <path d="M18 6l-12 12"></path>
+                </svg>
+              </span>
+              <span class="btn-label">Close</span>
+            </button>
+          </div>
+          <div class="trash-modal-body db-tools-body">
+            <div class="db-tools-intro">
+              <p class="db-tools-note">Backups run automatically every 24 hours. Use this panel to restore and manage backups.</p>
+              <div id="db-auto-summary" class="db-tools-summary">
+                Auto backup: checking...
+              </div>
+            </div>
+            <div class="db-tools-grid">
+              <section class="db-tools-block db-tools-block--restore" aria-label="Restore backup">
+                <h4>Restore Backup</h4>
+                <label class="db-tools-label" for="db-backup-select">
+                  Select backup file
+                  <select id="db-backup-select"></select>
+                </label>
+                <div class="db-tools-actions db-tools-actions--single">
+                  <button type="button" id="db-refresh-backups" class="ghost has-icon">
+                    <span class="btn-icon" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" role="img" focusable="false">
+                        <path d="M20 11a8 8 0 0 0-14.5-4"></path>
+                        <path d="M4 4v5h5"></path>
+                        <path d="M4 13a8 8 0 0 0 14.5 4"></path>
+                        <path d="M20 20v-5h-5"></path>
+                      </svg>
+                    </span>
+                    <span class="btn-label">Refresh List</span>
+                  </button>
+                  <button type="button" id="db-restore-selected" class="ghost has-icon">
+                    <span class="btn-icon" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" role="img" focusable="false">
+                        <path d="M4 12a8 8 0 1 0 3-6.2"></path>
+                        <path d="M4 4v5h5"></path>
+                      </svg>
+                    </span>
+                    <span class="btn-label">Restore Selected Backup</span>
+                  </button>
+                </div>
+              </section>
+              <section class="db-tools-block db-tools-block--updates" aria-label="Dependency updates">
+                <h4>Dependency Updates</h4>
+                <div class="db-tools-actions">
+                  <button type="button" id="db-check-updates" class="ghost has-icon">
+                    <span class="btn-icon" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" role="img" focusable="false">
+                        <circle cx="11" cy="11" r="6"></circle>
+                        <path d="M16.2 16.2L20 20"></path>
+                      </svg>
+                    </span>
+                    <span class="btn-label">Check Updates</span>
+                  </button>
+                  <button type="button" id="db-apply-updates" class="ghost has-icon">
+                    <span class="btn-icon" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" role="img" focusable="false">
+                        <path d="M20 7L10 17l-5-5"></path>
+                      </svg>
+                    </span>
+                    <span class="btn-label">Apply Updates</span>
+                  </button>
+                </div>
+                <div id="db-updates-summary" class="db-tools-summary">
+                  Update check not run yet.
+                </div>
+                <div id="db-tools-status" class="save-status warn db-tools-status">Ready</div>
+              </section>
+            </div>
+            <section class="db-tools-block db-tools-block--list" aria-label="Backup files">
+              <h4>Backup Files</h4>
+              <div class="table-wrap db-tools-table-wrap">
+                <table class="saved-table">
+                  <thead>
+                    <tr>
+                      <th>Backup File</th>
+                      <th>Updated</th>
+                      <th>Size</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="db-backups-body"></tbody>
+                </table>
+              </div>
+            </section>
+          </div>
+        </div>
+      </div>
+      <div id="report-style-modal" class="trash-modal report-style-modal" aria-hidden="true">
+        <div
+          class="trash-modal-card report-style-card"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Report Designer"
+        >
+          <div class="trash-modal-header">
+            <h3>Report Designer</h3>
+            <button type="button" id="report-style-close" class="ghost has-icon">
+              <span class="btn-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" role="img" focusable="false">
+                  <path d="M6 6l12 12"></path>
+                  <path d="M18 6l-12 12"></path>
+                </svg>
+              </span>
+              <span class="btn-label">Close</span>
+            </button>
+          </div>
+          <div class="trash-modal-body report-style-body">
+            <p class="db-tools-note">Edit report layout, table, logo, and colors. Changes are live.</p>
+            <div class="report-style-grid">
+              <label class="report-style-label" for="report-style-title-text">
+                Title
+                <input id="report-style-title-text" type="text" placeholder="PURCHASING ORDER" />
+              </label>
+              <label class="report-style-label" for="report-style-note-text">
+                Note Line
+                <input
+                  id="report-style-note-text"
+                  type="text"
+                  placeholder="Kindly present your offer for the following items:"
+                />
+              </label>
+              <label class="report-style-label" for="report-style-empty-text">
+                Empty Table Text
+                <input id="report-style-empty-text" type="text" placeholder="No items yet" />
+              </label>
+              <label class="report-style-label" for="report-style-title-align">
+                Title Alignment
+                <select id="report-style-title-align">
+                  <option value="center">Center</option>
+                  <option value="left">Left</option>
+                </select>
+              </label>
+              <label class="report-style-label" for="report-style-form-label">
+                Form Label
+                <input id="report-style-form-label" type="text" placeholder="form no." />
+              </label>
+              <label class="report-style-label" for="report-style-date-label">
+                Date Label
+                <input id="report-style-date-label" type="text" placeholder="Date" />
+              </label>
+              <label class="report-style-label" for="report-style-to-label">
+                To Label
+                <input id="report-style-to-label" type="text" placeholder="To :" />
+              </label>
+              <label class="report-style-label" for="report-style-postal-label">
+                Postal Label
+                <input id="report-style-postal-label" type="text" placeholder="POSTAL CODE :" />
+              </label>
+              <label class="report-style-label report-style-check">
+                <input id="report-style-show-row-number" type="checkbox" checked />
+                Show # Column
+              </label>
+              <label class="report-style-label report-style-check">
+                <input id="report-style-show-signatures" type="checkbox"  />
+                Show Signatures
+              </label>
+              <label class="report-style-label" for="report-style-signature-title">
+                Signature Title
+                <input id="report-style-signature-title" type="text" placeholder="Signature" />
+              </label>
+              <label class="report-style-label" for="report-style-sign-label-form-creator">
+                Signature Label (Form Creator)
+                <input id="report-style-sign-label-form-creator" type="text" placeholder="Form Creator" />
+              </label>
+              <label class="report-style-label" for="report-style-sign-label-production-manager">
+                Signature Label (Production Manager)
+                <input id="report-style-sign-label-production-manager" type="text" placeholder="Production Manager" />
+              </label>
+              <label class="report-style-label" for="report-style-sign-label-manager">
+                Signature Label (Manager)
+                <input id="report-style-sign-label-manager" type="text" placeholder="Manager" />
+              </label>
+              <label class="report-style-label" for="report-style-head-index">
+                Header #
+                <input id="report-style-head-index" type="text" placeholder="#" />
+              </label>
+              <label class="report-style-label" for="report-style-head-model">
+                Header NO (Model)
+                <input id="report-style-head-model" type="text" placeholder="NO (Model)" />
+              </label>
+              <label class="report-style-label" for="report-style-head-item">
+                Header Item
+                <input id="report-style-head-item" type="text" placeholder="Item" />
+              </label>
+              <label class="report-style-label" for="report-style-head-qty">
+                Header Qty
+                <input id="report-style-head-qty" type="text" placeholder="Qty" />
+              </label>
+              <label class="report-style-label" for="report-style-head-unit">
+                Header Unit
+                <input id="report-style-head-unit" type="text" placeholder="Unit" />
+              </label>
+              <label class="report-style-label" for="report-style-head-plan">
+                Header Plan
+                <input id="report-style-head-plan" type="text" placeholder="Plan Number" />
+              </label>
+              <label class="report-style-label" for="report-style-density">
+                Table Density
+                <select id="report-style-density">
+                  <option value="compact">Compact</option>
+                  <option value="normal">Normal</option>
+                  <option value="comfortable">Comfortable</option>
+                </select>
+              </label>
+              <label class="report-style-label" for="report-style-table-theme">
+                Table Theme
+                <select id="report-style-table-theme">
+                  <option value="zebra">Zebra Rows</option>
+                  <option value="solid">Solid Rows</option>
+                </select>
+              </label>
+              <label class="report-style-label" for="report-style-font-scale">
+                Font Size
+                <input id="report-style-font-scale" type="range" min="90" max="120" step="1" value="100" />
+                <span id="report-style-font-scale-value" class="report-style-range-value">100%</span>
+              </label>
+              <label class="report-style-label report-style-check">
+                <input id="report-style-show-logo" type="checkbox" checked />
+                Show Logo
+              </label>
+              <label class="report-style-label" for="report-style-logo-align">
+                Logo Alignment
+                <select id="report-style-logo-align">
+                  <option value="left">Left</option>
+                  <option value="center">Center</option>
+                  <option value="right">Right</option>
+                </select>
+              </label>
+              <label class="report-style-label" for="report-style-logo-scale">
+                Logo Size
+                <input id="report-style-logo-scale" type="range" min="60" max="180" step="1" value="100" />
+                <span id="report-style-logo-scale-value" class="report-style-range-value">100%</span>
+              </label>
+              <label class="report-style-label" for="report-style-logo-file">
+                Custom Logo (Optional)
+                <input id="report-style-logo-file" type="file" accept="image/*" />
+              </label>
+              <div class="report-style-file-actions">
+                <button type="button" id="report-style-logo-clear" class="ghost has-icon">
+                  <span class="btn-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" role="img" focusable="false">
+                      <path d="M4 5h16v14H4z"></path>
+                      <path d="M4 16l5-5 4 4 3-3 4 4"></path>
+                      <circle cx="9" cy="9" r="1.7"></circle>
+                    </svg>
+                  </span>
+                  <span class="btn-label">Use Default Logo</span>
+                </button>
+              </div>
+              <label class="report-style-label" for="report-style-paper-color">
+                Paper Color
+                <input id="report-style-paper-color" type="color" value="#ffffff" />
+              </label>
+              <label class="report-style-label" for="report-style-text-color">
+                Text Color
+                <input id="report-style-text-color" type="color" value="#0f172a" />
+              </label>
+              <label class="report-style-label" for="report-style-header-bg-color">
+                Table Header BG
+                <input id="report-style-header-bg-color" type="color" value="#0f172a" />
+              </label>
+              <label class="report-style-label" for="report-style-header-text-color">
+                Table Header Text
+                <input id="report-style-header-text-color" type="color" value="#ffffff" />
+              </label>
+              <label class="report-style-label" for="report-style-border-outer-color">
+                Outer Border
+                <input id="report-style-border-outer-color" type="color" value="#cbd5e1" />
+              </label>
+              <label class="report-style-label" for="report-style-border-inner-color">
+                Inner Border
+                <input id="report-style-border-inner-color" type="color" value="#e2e8f0" />
+              </label>
+              <label class="report-style-label" for="report-style-row-odd-color">
+                Odd Row Color
+                <input id="report-style-row-odd-color" type="color" value="#ffffff" />
+              </label>
+              <label class="report-style-label" for="report-style-row-even-color">
+                Even Row Color
+                <input id="report-style-row-even-color" type="color" value="#f8fafc" />
+              </label>
+            </div>
+            <div class="report-style-actions">
+              <button type="button" id="report-style-reset" class="ghost has-icon">
+                <span class="btn-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" role="img" focusable="false">
+                    <path d="M4 12a8 8 0 1 0 3-6.2"></path>
+                    <path d="M4 4v5h5"></path>
+                  </svg>
+                </span>
+                <span class="btn-label">Reset</span>
+              </button>
+              <button type="button" id="report-style-save-default" class="ghost has-icon">
+                <span class="btn-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" role="img" focusable="false">
+                    <path d="M12 3l3 6 6 .8-4.4 4.3 1 6.2-5.6-3-5.6 3 1-6.2L3 9.8 9 9z"></path>
+                  </svg>
+                </span>
+                <span class="btn-label">Save As Default</span>
+              </button>
+              <button type="button" id="report-style-save" class="primary has-icon">
+                <span class="btn-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" role="img" focusable="false">
+                    <path d="M5 4h12l2 2v14H5z"></path>
+                    <path d="M8 4v6h8V4"></path>
+                    <path d="M8 20v-6h8v6"></path>
+                  </svg>
+                </span>
+                <span class="btn-label">Save Style</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <section id="editor-window" class="layout editor-window">
+        <div class="editor-top">
+          <div class="editor-title">
+            <h2>PO Editor</h2>
+            <p>Click a form number to edit items.</p>
+          </div>
+          <div class="editor-actions">
+            <div class="save-status warn" id="editor-save-status">New draft</div>
+          </div>
+        </div>
+
+        <section class="panel form-panel">
+        <h2>PO Entry</h2>
+        <form id="po-form" autocomplete="off">
+          <div class="field-grid field-grid--3">
+            <label>
+              To
+              <input id="to" name="to" type="text" placeholder="SABO" />
+            </label>
+            <label>
+              Form No
+              <input id="formNo" name="formNo" type="text" placeholder="A48/025" />
+            </label>
+            <label>
+              Date
+              <input id="date" name="date" type="date" />
+            </label>
+          </div>
+
+          <div class="field-grid field-grid--3">
+            <label>
+              Company Name
+              <input id="companyName" name="companyName" type="text" placeholder="HALABJA GROUP" />
+            </label>
+            <label>
+              Address Line 1
+              <input id="companyLine1" name="companyLine1" type="text" placeholder="MALEEK MAHMOOD CIRCULAR ST" />
+            </label>
+            <label>
+              Address Line 2
+              <input id="companyLine2" name="companyLine2" type="text" placeholder="JUNCTION CHWARCHRA QTR" />
+            </label>
+            <label>
+              Address Line 3
+              <input id="companyLine3" name="companyLine3" type="text" placeholder="SULEYMANIYAH IRAQ" />
+            </label>
+            <label class="span-2">
+              Postal Code
+              <input id="postalCode" name="postalCode" type="text" placeholder="46001" />
+            </label>
+          </div>
+
+          <div class="field-grid field-grid--3">
+            <label>
+              Form Creator
+              <input id="formCreator" name="formCreator" type="text" placeholder="Mohamad Habib" />
+            </label>
+            <label>
+              Production Manager
+              <select id="productionManager" name="productionManager">
+                <option value="Saeed Brzo">Saeed Brzo</option>
+                <option value="Zhewar Mahamad">Zhewar Mahamad</option>
+              </select>
+            </label>
+            <label>
+              Manager
+              <input id="manager" name="manager" type="text" placeholder="Pishtiwan Fattah" />
+            </label>
+          </div>
+
+          <div class="items">
+            <div class="items-header">
+              <h3>Items</h3>
+              <div class="items-actions">
+                <button type="button" id="add-row" class="ghost has-icon">
+                  <span class="btn-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" role="img" focusable="false">
+                      <path d="M12 5v14"></path>
+                      <path d="M5 12h14"></path>
+                    </svg>
+                  </span>
+                  <span class="btn-label">Add Row</span>
+                </button>
+                <button type="button" id="clear-rows" class="ghost has-icon">
+                  <span class="btn-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" role="img" focusable="false">
+                      <path d="M3 6h18"></path>
+                      <path d="M8 6V4h8v2"></path>
+                      <path d="M6 6l1 14h10l1-14"></path>
+                    </svg>
+                  </span>
+                  <span class="btn-label">Clear Items</span>
+                </button>
+              </div>
+            </div>
+            <div class="table-wrap entry-table-wrap">
+              <table class="entry-table">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>NO (Model)</th>
+                    <th>Item</th>
+                    <th>Qty</th>
+                    <th>Unit</th>
+                    <th>Plan No</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody id="items-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </form>
+      </section>
+
+        <section class="panel preview-panel">
+        <div id="po-preview" class="po-preview">
+          <div class="report-live-tools">
+            <button
+              type="button"
+              id="report-style-open"
+              class="ghost preview-style-button"
+              aria-label="Report Adjust"
+              title="Report Adjust"
+            >
+              <span class="preview-style-button__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" role="img" focusable="false">
+                  <path d="M4 7h16" />
+                  <path d="M4 17h16" />
+                  <circle cx="9" cy="7" r="2.5" />
+                  <circle cx="15" cy="17" r="2.5" />
+                </svg>
+              </span>
+              <span class="preview-style-button__text">Report Adjust</span>
+            </button>
+          </div>
+          <div class="po-preview-content">
+            <div class="preview-brand" data-logo-align="left">
+              <img id="report-logo-preview" src="/static/img/po.jpg" alt="Report logo" />
+            </div>
+            <div class="preview-title" data-bind="reportTitle">PURCHASING ORDER</div>
+
+            <div class="preview-header">
+              <div class="company-block">
+                <div class="company-name" data-bind="companyName">HALABJA GROUP</div>
+                <div data-bind="companyLine1">MALEEK MAHMOOD CIRCULAR ST</div>
+                <div data-bind="companyLine2">JUNCTION CHWARCHRA QTR</div>
+                <div data-bind="companyLine3">SULEYMANIYAH IRAQ</div>
+                <div><span data-bind="reportPostalLabel">POSTAL CODE :</span> <span data-bind="postalCode">46001</span></div>
+              </div>
+              <div class="meta-block">
+                <div><span data-bind="reportFormLabel">form no.</span> <strong data-bind="formNo">A48/025</strong></div>
+                <div><span data-bind="reportDateLabel">Date</span> <strong data-bind="dateDisplay">7 September 2025</strong></div>
+              </div>
+            </div>
+
+            <div class="to-line">
+              <span class="label" data-bind="reportToLabel">To :</span>
+              <span data-bind="to">SABO</span>
+            </div>
+
+            <div class="preview-note" data-bind="reportNote">Kindly present your offer for the following items:</div>
+
+            <table class="preview-table">
+              <thead>
+                <tr>
+                  <th data-column="index" data-bind="reportHeadIndex">#</th>
+                  <th data-bind="reportHeadModel">NO (Model)</th>
+                  <th data-bind="reportHeadItem">Item</th>
+                  <th data-bind="reportHeadQty">Qty</th>
+                  <th data-bind="reportHeadUnit">Unit</th>
+                  <th data-bind="reportHeadPlan">plan number</th>
+                </tr>
+              </thead>
+              <tbody id="preview-items"></tbody>
+            </table>
+
+            <div class="signatures">
+              <div class="signature-title" data-bind="reportSignatureTitle">Signature</div>
+              <div class="signature-row">
+                <div class="signature-name"><span data-bind="reportSignLabelFormCreator">Form Creator</span>: <span data-bind="formCreator">Mohamad Habib</span></div>
+                <div class="signature-inline">
+                  <canvas id="sig-formCreator" class="signature-canvas-inline" aria-label="Form Creator signature"></canvas>
+                  <button type="button" class="signature-clear has-icon" data-sig="formCreator">
+                    <span class="btn-icon" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" role="img" focusable="false">
+                        <path d="M4 6h16"></path>
+                        <path d="M8 6V4h8v2"></path>
+                        <path d="M6 6l1 14h10l1-14"></path>
+                      </svg>
+                    </span>
+                    <span class="btn-label">Clear</span>
+                  </button>
+                </div>
+              </div>
+              <div class="signature-row">
+                <div class="signature-name"><span data-bind="reportSignLabelProductionManager">Production Manager</span>: <span data-bind="productionManager"></span></div>
+                <div class="signature-inline">
+                  <canvas id="sig-productionManager" class="signature-canvas-inline" aria-label="Production Manager signature"></canvas>
+                  <button type="button" class="signature-clear has-icon" data-sig="productionManager">
+                    <span class="btn-icon" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" role="img" focusable="false">
+                        <path d="M4 6h16"></path>
+                        <path d="M8 6V4h8v2"></path>
+                        <path d="M6 6l1 14h10l1-14"></path>
+                      </svg>
+                    </span>
+                    <span class="btn-label">Clear</span>
+                  </button>
+                </div>
+              </div>
+              <div class="signature-row">
+                <div class="signature-name"><span data-bind="reportSignLabelManager">Manager</span>: <span data-bind="manager">Pishtiwan Fattah</span></div>
+                <div class="signature-inline">
+                  <canvas id="sig-manager" class="signature-canvas-inline" aria-label="Manager signature"></canvas>
+                  <button type="button" class="signature-clear has-icon" data-sig="manager">
+                    <span class="btn-icon" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" role="img" focusable="false">
+                        <path d="M4 6h16"></path>
+                        <path d="M8 6V4h8v2"></path>
+                        <path d="M6 6l1 14h10l1-14"></path>
+                      </svg>
+                    </span>
+                    <span class="btn-label">Clear</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="page-number">Page 1/1</div>
+        </div>
+        </section>
+      </section>
+
+      <section class="panel saved-panel">
+        <div class="saved-header">
+          <div>
+            <h2>Saved POs</h2>
+            <p class="saved-subtitle">Stored locally (SQLite by default).</p>
+          </div>
+          <div class="saved-actions">
+            <button type="button" id="open-trash" class="ghost trash-toggle" aria-label="Open Trash" title="Open Trash">
+              <img class="trash-icon" src="/static/img/trash.png" alt="" aria-hidden="true" />
+              <span class="sr-only">Open Trash</span>
+            </button>
+            <input id="search" type="search" placeholder="Search by form no, to, company" />
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table class="saved-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Form No</th>
+                <th>To</th>
+                <th>Date</th>
+                <th>Company</th>
+                <th>Items</th>
+                <th>Updated</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="saved-body"></tbody>
+          </table>
+        </div>
+      </section>
+
+    </main>
+
+    <script>
+      window.__PO_AUTH_CODE_ONLY__ = {{ "true" if auth_code_only else "false" }};
+    </script>
+    <script src="{{ url_for('static', filename='app.js', v=js_version) }}"></script>
+  </body>
+</html>

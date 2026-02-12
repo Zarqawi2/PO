@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>PO Management Demo</title>
+    <meta
+      name="description"
+      content="PO Management public demo page. Static preview only, no backend/database."
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand">
+        <strong>PO Management</strong>
+        <span>Public Demo</span>
+      </div>
+      <div class="topbar-note">Static mode: no login, no database, no save.</div>
+    </header>
+
+    <main class="layout">
+      <section class="panel form-panel">
+        <div class="panel-head">
+          <h1>PO Entry</h1>
+          <div class="panel-actions">
+            <button type="button" id="fill-sample" class="ghost">Fill Sample</button>
+            <button type="button" id="reset-form" class="ghost">Reset</button>
+          </div>
+        </div>
+
+        <form id="demo-form" autocomplete="off">
+          <div class="field-grid field-grid-3">
+            <label>
+              To
+              <input id="to" type="text" placeholder="SABO" />
+            </label>
+            <label>
+              Form No
+              <input id="formNo" type="text" placeholder="A48/025" />
+            </label>
+            <label>
+              Date
+              <input id="date" type="date" />
+            </label>
+          </div>
+
+          <div class="field-grid field-grid-3">
+            <label>
+              Company Name
+              <input id="companyName" type="text" placeholder="HALABJA GROUP" />
+            </label>
+            <label>
+              Address Line 1
+              <input id="companyLine1" type="text" placeholder="MALEEK MAHMOOD CIRCULAR ST" />
+            </label>
+            <label>
+              Address Line 2
+              <input id="companyLine2" type="text" placeholder="JUNCTION CHWARCHRA QTR" />
+            </label>
+            <label>
+              Address Line 3
+              <input id="companyLine3" type="text" placeholder="SULEYMANIYAH IRAQ" />
+            </label>
+            <label class="span-2">
+              Postal Code
+              <input id="postalCode" type="text" placeholder="46001" />
+            </label>
+          </div>
+
+          <div class="field-grid field-grid-3">
+            <label>
+              Form Creator
+              <input id="formCreator" type="text" placeholder="Mohamad Habib" />
+            </label>
+            <label>
+              Production Manager
+              <input id="productionManager" type="text" placeholder="Saeed Brzo" />
+            </label>
+            <label>
+              Manager
+              <input id="manager" type="text" placeholder="Pishtiwan Fattah" />
+            </label>
+          </div>
+
+          <div class="items">
+            <div class="items-head">
+              <h2>Items</h2>
+              <button type="button" id="add-row" class="primary">Add Row</button>
+            </div>
+            <div class="table-wrap">
+              <table class="entry-table">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>NO (Model)</th>
+                    <th>Item</th>
+                    <th>Qty</th>
+                    <th>Unit</th>
+                    <th>Plan No</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody id="items-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </form>
+      </section>
+
+      <section class="panel preview-panel">
+        <h2>Live Preview</h2>
+        <article class="po-preview" id="po-preview">
+          <h3 class="preview-title">PURCHASING ORDER</h3>
+          <div class="meta">
+            <div><span>form no.</span> <strong id="pv-formNo">-</strong></div>
+            <div><span>date</span> <strong id="pv-date">-</strong></div>
+          </div>
+
+          <div class="address">
+            <strong id="pv-companyName">-</strong>
+            <div id="pv-companyLine1">-</div>
+            <div id="pv-companyLine2">-</div>
+            <div id="pv-companyLine3">-</div>
+            <div>POSTAL CODE: <span id="pv-postalCode">-</span></div>
+          </div>
+
+          <p class="to-line">To: <strong id="pv-to">-</strong></p>
+          <p class="note">Kindly present your offer for the following items:</p>
+
+          <div class="table-wrap">
+            <table class="preview-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>NO (Model)</th>
+                  <th>Item</th>
+                  <th>Qty</th>
+                  <th>Unit</th>
+                  <th>Plan Number</th>
+                </tr>
+              </thead>
+              <tbody id="preview-items"></tbody>
+            </table>
+          </div>
+
+          <div class="signatures">
+            <div>Form Creator: <span id="pv-formCreator">-</span></div>
+            <div>Production Manager: <span id="pv-productionManager">-</span></div>
+            <div>Manager: <span id="pv-manager">-</span></div>
+          </div>
+        </article>
+      </section>
+    </main>
+
+    <script src="./app.js"></script>
+  </body>
+</html>
