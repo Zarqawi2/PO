@@ -38,20 +38,20 @@ const state = {
 };
 
 const samplePayload = {
-  to: "SABO",
-  formNo: "A48/025",
+  to: "Client Alpha",
+  formNo: "PO-2026-001",
   date: new Date().toISOString().slice(0, 10),
-  companyName: "HALABJA GROUP",
-  companyLine1: "MALEEK MAHMOOD CIRCULAR ST",
-  companyLine2: "JUNCTION CHWARCHRA QTR",
-  companyLine3: "SULEYMANIYAH IRAQ",
-  postalCode: "46001",
-  formCreator: "Mohamad Habib",
-  productionManager: "Saeed Brzo",
-  manager: "Pishtiwan Fattah",
+  companyName: "Example Trading Co.",
+  companyLine1: "123 Demo Street",
+  companyLine2: "Business District",
+  companyLine3: "Metro City",
+  postalCode: "10001",
+  formCreator: "User One",
+  productionManager: "User Two",
+  manager: "User Three",
   items: [
-    { model: "MD-101", item: "Pump", qty: "15", unit: "pcs", plan: "PL-24-A" },
-    { model: "MD-220", item: "Valve", qty: "30", unit: "pcs", plan: "PL-24-B" },
+    { model: "MD-001", item: "Demo Item A", qty: "12", unit: "pcs", plan: "PLAN-A1" },
+    { model: "MD-002", item: "Demo Item B", qty: "20", unit: "pcs", plan: "PLAN-B2" },
   ],
 };
 
